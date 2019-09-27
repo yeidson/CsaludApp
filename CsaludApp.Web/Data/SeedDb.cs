@@ -1,4 +1,5 @@
 ﻿using CsaludApp.Web.Data.Entities;
+using CsaludApp.Web.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,45 +10,77 @@ namespace CsaludApp.Web.Data
     public class SeedDb
     {
         private readonly DataContext _dataContext;
+        private readonly IUserHelper _userHelper;
 
-        public SeedDb(DataContext context)
+        public SeedDb(
+            DataContext context,
+            IUserHelper userHelper)
         {
             _dataContext = context;
+            _userHelper = userHelper;
         }
 
         public async Task SeedAsync()
         {
             await _dataContext.Database.EnsureCreatedAsync();
-            await CheckDentistsAsync();
+            await CheckRoles();
+            var manager = await CheckUserAsync("98773907", "Yeidson", "Benitez", "coordinacionti@sumidental.co", "316 691 8342", "Cra 66b #34a - 04", "Admin");
+            var healthcare = await CheckUserAsync("1017938773", "Yeison", "Taborda", "yeisonenator@gmail.com", "300 853 3956", "Cra 81 #45-31", "Customer");
+            await CheckManagerAsync(manager);
+            await CheckDentistsAsync(healthcare);
             await CheckDiagnosesAsync();
             await CheckPatientsAsync();
             await CheckProcessesAsync();
         }
 
-        private async Task CheckDentistsAsync()
+        private async Task CheckRoles()
+        {
+            await _userHelper.CheckRoleAsync("Admin");
+            await _userHelper.CheckRoleAsync("Customer");
+        }
+
+        private async Task<User> CheckUserAsync(string document, string firstName, string lastName, string email, string phone, string address, string role)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                user = new User
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    UserName = email,
+                    PhoneNumber = phone,
+                    Address = address,
+                    Document = document
+                };
+
+                await _userHelper.AddUserAsync(user, "123456");
+                await _userHelper.AddUserToRoleAsync(user, role);
+            }
+
+            return user;
+        }
+
+        private async Task CheckDentistsAsync(User user)
         {
             if (!_dataContext.Dentists.Any())
             {
-                AddDentist("98773907", "Yeidson", "Benitez", "413 6624", "300 853 3956", "Cra 81 #45 - 31");
-                AddDentist("71312297", "Alejandro", "Diaz", "343 3226", "300 322 3221", "Calle 77 #22 21");
-                AddDentist("1017213949", "Lina", "Arango", "450 4332", "350 322 3221", "Carrera 56 #22 21");
+                _dataContext.Dentists.Add(new Dentist { User = user });
                 await _dataContext.SaveChangesAsync();
             }
 
         }
 
-        private void AddDentist(string document, string firstName, string lastName, string fixedPhone, string cellPhone, string address)
+        private async Task CheckManagerAsync(User user)
         {
-            _dataContext.Dentists.Add(new Dentist
+            if (!_dataContext.Managers.Any())
             {
-                Address = address,
-                CellPhone = cellPhone,
-                Document = document,
-                FirstName = firstName,
-                FixedPhone = fixedPhone,
-                LastName = lastName
-            });
+                _dataContext.Managers.Add(new Manager { User = user });
+                await _dataContext.SaveChangesAsync();
+            }
         }
+
 
         private async Task CheckProcessesAsync()
         {
@@ -61,7 +94,7 @@ namespace CsaludApp.Web.Data
 
         private void AddProcess(string CodePx, string NamePx)
         {
-            _dataContext.Processes.Add(new Process
+            _dataContext.Processes.Add(new Entities.Process
             {
                 CodePx = CodePx,
                 NamePx = NamePx

@@ -10,22 +10,22 @@ using CsaludApp.Web.Data.Entities;
 
 namespace CsaludApp.Web.Controllers
 {
-    public class DentistsController : Controller
+    public class ManagersController : Controller
     {
         private readonly DataContext _context;
 
-        public DentistsController(DataContext context)
+        public ManagersController(DataContext context)
         {
             _context = context;
         }
 
-        // GET: Dentists
+        // GET: Managers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Dentists.ToListAsync());
+            return View(await _context.Managers.ToListAsync());
         }
 
-        // GET: Dentists/Details/5
+        // GET: Managers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -33,39 +33,39 @@ namespace CsaludApp.Web.Controllers
                 return NotFound();
             }
 
-            var dentist = await _context.Dentists
+            var manager = await _context.Managers
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (dentist == null)
+            if (manager == null)
             {
                 return NotFound();
             }
 
-            return View(dentist);
+            return View(manager);
         }
 
-        // GET: Dentists/Create
+        // GET: Managers/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Dentists/Create
+        // POST: Managers/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Document")] Dentist dentist)
+        public async Task<IActionResult> Create([Bind("Id")] Manager manager)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(dentist);
+                _context.Add(manager);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(dentist);
+            return View(manager);
         }
 
-        // GET: Dentists/Edit/5
+        // GET: Managers/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -73,22 +73,22 @@ namespace CsaludApp.Web.Controllers
                 return NotFound();
             }
 
-            var dentist = await _context.Dentists.FindAsync(id);
-            if (dentist == null)
+            var manager = await _context.Managers.FindAsync(id);
+            if (manager == null)
             {
                 return NotFound();
             }
-            return View(dentist);
+            return View(manager);
         }
 
-        // POST: Dentists/Edit/5
+        // POST: Managers/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Document")] Dentist dentist)
+        public async Task<IActionResult> Edit(int id, [Bind("Id")] Manager manager)
         {
-            if (id != dentist.Id)
+            if (id != manager.Id)
             {
                 return NotFound();
             }
@@ -97,12 +97,12 @@ namespace CsaludApp.Web.Controllers
             {
                 try
                 {
-                    _context.Update(dentist);
+                    _context.Update(manager);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DentistExists(dentist.Id))
+                    if (!ManagerExists(manager.Id))
                     {
                         return NotFound();
                     }
@@ -113,10 +113,10 @@ namespace CsaludApp.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(dentist);
+            return View(manager);
         }
 
-        // GET: Dentists/Delete/5
+        // GET: Managers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -124,30 +124,30 @@ namespace CsaludApp.Web.Controllers
                 return NotFound();
             }
 
-            var dentist = await _context.Dentists
+            var manager = await _context.Managers
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (dentist == null)
+            if (manager == null)
             {
                 return NotFound();
             }
 
-            return View(dentist);
+            return View(manager);
         }
 
-        // POST: Dentists/Delete/5
+        // POST: Managers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var dentist = await _context.Dentists.FindAsync(id);
-            _context.Dentists.Remove(dentist);
+            var manager = await _context.Managers.FindAsync(id);
+            _context.Managers.Remove(manager);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool DentistExists(int id)
+        private bool ManagerExists(int id)
         {
-            return _context.Dentists.Any(e => e.Id == id);
+            return _context.Managers.Any(e => e.Id == id);
         }
     }
 }
