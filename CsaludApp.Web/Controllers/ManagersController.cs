@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CsaludApp.Web.Data;
 using CsaludApp.Web.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CsaludApp.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ManagersController : Controller
     {
         private readonly DataContext _context;
