@@ -21,6 +21,7 @@ namespace CsaludApp.Web.Data.Entities
         [Display(Name = "Diagnosis")]
         public string FullDiagnosisWithCode => $"{NameDx} - {CodeDx}";
 
-        public Consent Consent { get; set; }
+        //public Consent Consent { get; set; }
+        public ICollection<Consent> Consents { get; set; }
     }
 }

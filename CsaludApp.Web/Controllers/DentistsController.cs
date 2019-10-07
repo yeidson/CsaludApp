@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using CsaludApp.Web.Data;
 using CsaludApp.Web.Data.Entities;
 using Microsoft.AspNetCore.Authorization;
+using CsaludApp.Web.Models;
+using CsaludApp.Web.Helpers;
 
 namespace CsaludApp.Web.Controllers
 {
@@ -15,16 +17,17 @@ namespace CsaludApp.Web.Controllers
     public class DentistsController : Controller
     {
         private readonly DataContext _context;
+        private readonly IUserHelper _userHelper;
 
-        public DentistsController(DataContext context)
+        public DentistsController(DataContext context, IUserHelper userHelper)
         {
             _context = context;
+            _userHelper = userHelper;
         }
 
-        // GET: Dentists
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Dentists.ToListAsync());
+            return View( _context.Dentists.Include(d => d.User));
         }
 
         // GET: Dentists/Details/5
@@ -36,6 +39,7 @@ namespace CsaludApp.Web.Controllers
             }
 
             var dentist = await _context.Dentists
+                .Include(o => o.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (dentist == null)
             {
@@ -51,20 +55,53 @@ namespace CsaludApp.Web.Controllers
             return View();
         }
 
-        // POST: Dentists/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Document")] Dentist dentist)
+        public async Task<IActionResult> Create(AddUserViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(dentist);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var user = new User
+                {
+                    Address = model.Address,
+                    Document = model.Document,
+                    Email = model.Username,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    PhoneNumber = model.PhoneNumber,
+                    UserName = model.Username
+                };
+
+                var response = await _userHelper.AddUserAsync(user, model.Password);
+                if (response.Succeeded)
+                {
+                    var userInBD = await _userHelper.GetUserByEmailAsync(model.Username);
+                    await _userHelper.AddUserToRoleAsync(userInBD, "healthcare");
+
+                    var dentist = new Dentist
+                    {
+                        User = userInBD
+                    };
+
+                    _context.Dentists.Add(dentist);
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (Exception ex)
+                    {
+
+                        ModelState.AddModelError(string.Empty, ex.ToString());
+                        return View(model);
+                    }
+                    
+                }
+
+                ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description);
             }
-            return View(dentist);
+            return View(model);
         }
 
         // GET: Dentists/Edit/5

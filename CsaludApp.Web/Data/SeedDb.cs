@@ -25,18 +25,20 @@ namespace CsaludApp.Web.Data
             await _dataContext.Database.EnsureCreatedAsync();
             await CheckRoles();
             var manager = await CheckUserAsync("98773907", "Yeidson", "Benitez", "coordinacionti@sumidental.co", "316 691 8342", "Cra 66b #34a - 04", "Admin");
-            var healthcare = await CheckUserAsync("1017938773", "Yeison", "Taborda", "yeisonenator@gmail.com", "300 853 3956", "Cra 81 #45-31", "Customer");
+            var healthcare = await CheckUserAsync("1017938773", "Yeison", "Taborda", "yeisonenator@gmail.com", "300 853 3956", "Cra 81 #45-31", "healthcare");
             await CheckManagerAsync(manager);
             await CheckDentistsAsync(healthcare);
             await CheckDiagnosesAsync();
             await CheckPatientsAsync();
             await CheckProcessesAsync();
+            await CheckInquiryTypesAsync();
+            await CheckPatientTypesAsync();
         }
 
         private async Task CheckRoles()
         {
             await _userHelper.CheckRoleAsync("Admin");
-            await _userHelper.CheckRoleAsync("Customer");
+            await _userHelper.CheckRoleAsync("healthcare");
         }
 
         private async Task<User> CheckUserAsync(string document, string firstName, string lastName, string email, string phone, string address, string role)
@@ -105,13 +107,14 @@ namespace CsaludApp.Web.Data
         {
             if (!_dataContext.Patients.Any())
             {
-                AddPatient("1017938773", "Maximiliano", "Benitez", "300 853 3956", "Menor de edad");
-                AddPatient("43220517", "Caterine", "Dimitrova", "301 638 2682", "Cotizante");
+                var patienttype = _dataContext.PatientTypes.FirstOrDefault();
+                AddPatient("1017938773", "Maximiliano", "Benitez", "300 853 3956", "Menor de edad", patienttype);
+                AddPatient("43220517", "Caterine", "Dimitrova", "301 638 2682", "Mamá Primeriza", patienttype);
                 await _dataContext.SaveChangesAsync();
             }
         }
 
-        private void AddPatient(string Document, string FirstName, string LastName, string CellPhone, string Remarks)
+        private void AddPatient(string Document, string FirstName, string LastName, string CellPhone, string Remarks, PatientType patientType)
         {
             _dataContext.Patients.Add(new Patient
             {
@@ -120,7 +123,8 @@ namespace CsaludApp.Web.Data
                 LastName = LastName,
                 CellPhone = CellPhone,
                 Born = DateTime.Now.AddYears(-2),
-                Remarks = Remarks
+                Remarks = Remarks,
+                PatientType = patientType
             });
         }
 
@@ -142,5 +146,40 @@ namespace CsaludApp.Web.Data
                 NameDx = NameDx
             });
         }
+
+        private async Task CheckInquiryTypesAsync()
+        {
+            if (!_dataContext.InquiryTypes.Any())
+            {
+                AddInquiryType("001", "CONSULTA DE PRIMERA VEZ ODONTOLOGIA GENERAL");
+                AddInquiryType("002", "CONSULTA DE  CONTROL ODONTOLOGIA GENERAL");
+                AddInquiryType("003", "CONSULTA DE  PRIMERA VEZ ODONTOLOGIA ESPECIALIZADA");
+                AddInquiryType("004", "CONSULTA DE  CONTROL ODONTOLOGIA ESPECIALIZADA");
+                AddInquiryType("005", "CONSULTA DE  HIGIENE ORAL");
+                AddInquiryType("006", "CONSULTA DE URGENCIA ODONTOLOGIA");
+                await _dataContext.SaveChangesAsync();
+            }
+        }
+
+        private void AddInquiryType(string Code, string NameInquiry)
+        {
+            _dataContext.InquiryTypes.Add(new InquiryType
+            {
+                Code = Code,
+                NameInquiry = NameInquiry
+            });
+        }
+
+        private async Task CheckPatientTypesAsync()
+        {
+            if (!_dataContext.PatientTypes.Any())
+            {
+                _dataContext.PatientTypes.Add(new PatientType { NamePatientType = "Quote" });
+                _dataContext.PatientTypes.Add(new PatientType { NamePatientType = "Beneficiary" });
+                _dataContext.PatientTypes.Add(new PatientType { NamePatientType = "Particular" });
+                await _dataContext.SaveChangesAsync();
+            }
+        }
     }
 }
+

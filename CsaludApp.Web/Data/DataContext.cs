@@ -25,5 +25,10 @@ namespace CsaludApp.Web.Data
         public DbSet<Patient> Patients { get; set; }
 
         public DbSet<Process> Processes { get; set; }
+
+        public DbSet<InquiryType> InquiryTypes { get; set; }
+
+        public DbSet<PatientType> PatientTypes { get; set; }
+
     }
 }

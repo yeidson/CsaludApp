@@ -49,6 +49,9 @@ namespace CsaludApp.Web.Data.Entities
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}")]
         public DateTime BornLocal => Born.ToLocalTime();
 
-        public ICollection<Patient> Patients { get; set; }
+        public PatientType PatientType { get; set; }
+
+        //public ICollection<Patient> Patients { get; set; }
+        public ICollection<Consent> Consents { get; set; }
     }
 }

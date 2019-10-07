@@ -25,9 +25,11 @@ namespace CsaludApp.Web.Data.Entities
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}", ApplyFormatInEditMode = true)]
         public DateTime DateLocal => Date.ToLocalTime();
 
-        public ICollection<Diagnosis> Diagnoses { get; set; }
+        //public ICollection<Diagnosis> Diagnoses { get; set; }
+        public Diagnosis Diagnosis { get; set; }
 
-        public ICollection<Process> Processes { get; set; }
+        //public ICollection<Process> Processes { get; set; }
+        public Process Process { get; set; }
 
         public Patient Patient { get; set; }
 
